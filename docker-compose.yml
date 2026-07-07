@@ -1,0 +1,53 @@
+
+
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_HOST=http://host.docker.internal:11434
+      - MOBSF_HOST=http://mobsf:8000
+      - MOBSF_API_KEY=mobsf_api_key_secret_here
+
+      # ── Frida Dynamic Analysis ──────────────────────────────────────────────
+      # The Android emulator runs on the HOST machine (Android Studio AVD).
+      # The backend container reaches it via host.docker.internal over ADB TCP.
+      #
+      # Setup steps (one-time, on the host):
+      #   1. Start your AVD emulator in Android Studio
+      #   2. Run: adb tcpip 5555
+      #   3. Run: adb connect host.docker.internal:5555   ← inside the container
+      #      (or set ADB_HOST below and frida_sandbox.py handles it automatically)
+      #
+      - ADB_HOST=host.docker.internal      # Host machine where emulator runs
+      - ADB_PORT=5555                       # ADB TCP port (set via: adb tcpip 5555)
+      - FRIDA_ANALYSIS_DURATION=30          # Seconds to monitor each APK (default 30)
+    volumes:
+      - ./backend:/app
+      - ~/.android:/root/.android:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # Ensures host.docker.internal resolves on Linux
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000/api/v1
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  mobsf:
+    image: opensecurity/mobile-security-framework-mobsf:latest
+    ports:
+      - "8001:8000"
+    environment:
+      - MOBSF_API_KEY=mobsf_api_key_secret_here

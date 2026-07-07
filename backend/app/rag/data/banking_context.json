@@ -1,0 +1,147 @@
+{
+  "rbi_directives": [
+    {
+      "id": "RBI-MDS-2021",
+      "title": "Master Direction on Digital Payment Security Controls",
+      "issued": "2021-02-18",
+      "summary": "RBI mandates all regulated entities (banks, payment aggregators) to implement multi-factor authentication for digital payments. OTP via SMS is the primary second factor. Banks must detect and report any malware that intercepts OTPs within 6 hours of detection.",
+      "key_controls": [
+        "MFA mandatory for all transactions above INR 5000",
+        "OTP validity must not exceed 30 seconds for high-value transactions",
+        "Banks must implement transaction anomaly detection",
+        "Mobile banking apps must detect rooted/jailbroken devices",
+        "Certificate pinning mandatory for mobile banking apps",
+        "In-app overlay detection recommended for Android apps"
+      ],
+      "relevant_permissions": ["READ_SMS", "RECEIVE_SMS", "BIND_ACCESSIBILITY_SERVICE"],
+      "penalty": "Violation may result in fine up to INR 1 crore per incident and suspension of payment services"
+    },
+    {
+      "id": "RBI-ITF-2021",
+      "title": "IT Framework for Banks — Cyber Security Policy",
+      "issued": "2021-11-02",
+      "summary": "RBI mandates banks to maintain a 24x7 SOC, conduct threat intelligence sharing, and implement mobile application security testing before deployment. Third-party APKs used for banking must undergo security review.",
+      "key_controls": [
+        "24x7 SOC mandatory for scheduled commercial banks",
+        "VAPT of mobile banking apps before release",
+        "Threat intelligence sharing with CERT-In and RBI-CSITE",
+        "Incident reporting within 2 hours of detection",
+        "Customer advisory within 24 hours of confirmed fraud",
+        "Malware analysis capability or third-party empanelment"
+      ],
+      "relevant_permissions": ["SYSTEM_ALERT_WINDOW", "REQUEST_INSTALL_PACKAGES"],
+      "penalty": "Non-compliance reported to Board; RBI inspection findings"
+    },
+    {
+      "id": "RBI-CPG-2022",
+      "title": "Customer Protection Guidelines — Mobile Banking Fraud",
+      "issued": "2022-08-01",
+      "summary": "RBI mandates zero-liability for customers when fraud occurs due to bank system compromise. Banks must provide 24-hour fraud reporting channel and reimburse within 10 working days. Proactive customer advisory when new malware targeting their app is detected.",
+      "key_controls": [
+        "Zero customer liability for bank-side fraud",
+        "24-hour fraud helpline mandatory",
+        "Proactive SMS/email advisory to affected customers",
+        "Reimburse within 10 working days pending investigation",
+        "Maintain fraud risk score for all mobile transactions"
+      ],
+      "customer_advisory_trigger": "When APK targeting bank's package name is detected with Critical or High Risk score",
+      "advisory_template": "Alert: A malicious app impersonating banking services has been detected. Do NOT install apps from unofficial sources. If you have installed a suspicious app, please call our fraud helpline at 1800-XXX-XXXX immediately."
+    },
+    {
+      "id": "RBI-CSITE-TI-2023",
+      "title": "RBI-CSITE Threat Intelligence Bulletin — Android Banking Malware 2023",
+      "issued": "2023-03-15",
+      "summary": "RBI Computer Science and Information Technology Examination (RBI-CSITE) advisory on rise of Android banking trojans targeting Indian banking apps. Drinik, Xenomorph, and SOVA variants specifically targeting Indian UPI ecosystem.",
+      "active_threats": [
+        "Drinik v3 — targets SBI, BOI, PNB with accessibility overlay",
+        "Xenomorph — targeting 400+ banking apps globally including Indian banks",
+        "SOVA — sophisticated banking trojan with 2FA bypass",
+        "FluBot — SMS worm with OTP interception, Indian campaigns active"
+      ],
+      "indicators": [
+        "Package name com.sbi.lotusintouch impersonation",
+        "com.boi.* fake package names",
+        "UPI deep links in malicious APKs",
+        "NPCI overlay templates"
+      ]
+    }
+  ],
+  "cert_in_advisories": [
+    {
+      "id": "CIAD-2023-0042",
+      "title": "Android Dropper Malware — Banking Sector Alert",
+      "severity": "Critical",
+      "issued": "2023-06-20",
+      "summary": "CERT-In has observed a campaign distributing Android dropper APKs through WhatsApp and SMS links. The droppers use DexClassLoader to fetch second-stage banking trojan payloads from pastebin-like services.",
+      "iocs": [
+        "*.ngrok.io domains for C2",
+        "pastebin.com/raw/* URLs in APK strings",
+        "Package names resembling IRCTC, Income Tax, or bank apps",
+        "APK size under 500KB (dropper stage)"
+      ],
+      "recommended_actions": [
+        "Block ngrok.io and pastebin.com at network perimeter",
+        "Alert customers not to install APKs from WhatsApp links",
+        "Deploy mobile threat defense on corporate devices",
+        "Report compromised devices to CERT-In within 6 hours"
+      ]
+    },
+    {
+      "id": "CIAD-2023-0067",
+      "title": "Drinik Banking Trojan — New Variant Alert",
+      "severity": "Critical",
+      "issued": "2023-09-12",
+      "summary": "New Drinik variant targeting 18 Indian banks with updated overlay screens for UPI PIN harvesting. Uses Accessibility Service to auto-fill OTPs and perform fraudulent transfers.",
+      "affected_banks": ["SBI", "BOI", "ICICI", "HDFC", "Axis", "PNB", "Kotak", "Canara"],
+      "iocs": [
+        "Package: com.tax.itr.efilingservices",
+        "Package: com.incomtaxindia.gov.apk",
+        "SHA256 families: known Drinik hash clusters",
+        "C2: hxxp://45.*.*.*/panel/"
+      ],
+      "recommended_actions": [
+        "Block identified package names on MDM",
+        "Issue emergency customer advisory",
+        "Monitor for transactions from devices with Accessibility abuse",
+        "Enable behavioral analytics for UPI transactions"
+      ]
+    }
+  ],
+  "npci_security": [
+    {
+      "id": "NPCI-SEC-2022",
+      "title": "UPI Ecosystem Security — Mobile App Requirements",
+      "summary": "NPCI mandates all UPI apps to implement root detection, emulator detection, overlay attack prevention, and secure keyboard for PIN entry. Apps must detect when another app is drawing over them during payment flow.",
+      "requirements": [
+        "Root/jailbreak detection mandatory",
+        "Emulator detection for payment flow",
+        "Overlay attack detection during PIN entry",
+        "Secure keyboard (virtual) for credentials",
+        "App integrity verification",
+        "Network security config with certificate pinning"
+      ],
+      "upi_package_ids": [
+        "in.org.npci.upiapp",
+        "com.google.android.apps.nbu.paisa.user",
+        "net.one97.paytm",
+        "com.phonepe.app",
+        "com.amazon.mShop.android.shopping"
+      ]
+    }
+  ],
+  "indian_banking_packages": {
+    "com.boi": "Bank of India — BHIM BOI UPI",
+    "com.sbi.lotusintouch": "State Bank of India — YONO SBI",
+    "com.icici": "ICICI Bank — iMobile Pay",
+    "com.hdfcbank.hdfcquickpayapp": "HDFC Bank — MobileBanking",
+    "com.axis.mobile": "Axis Bank — Mobile Banking",
+    "com.pnb": "Punjab National Bank — PNB ONE",
+    "com.kotak.mobilebanking": "Kotak Mahindra Bank",
+    "com.canarabank.mobility": "Canara Bank — Canara ai1",
+    "com.unionbank.eunionbank": "Union Bank — Union Bank Mobile",
+    "in.org.npci.upiapp": "BHIM UPI",
+    "net.one97.paytm": "Paytm",
+    "com.phonepe.app": "PhonePe",
+    "com.google.android.apps.nbu.paisa.user": "Google Pay"
+  }
+}

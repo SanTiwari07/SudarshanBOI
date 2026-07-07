@@ -1,0 +1,20 @@
+fastapi
+uvicorn
+pydantic
+python-multipart
+androguard
+httpx
+pytest
+aiofiles
+stix2
+frida
+frida-tools
+# Persistence layer
+aiosqlite
+databases
+# Auth
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt==3.2.2
+# Async extras
+anyio
