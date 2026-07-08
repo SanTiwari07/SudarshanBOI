@@ -124,123 +124,20 @@ async def _worker(worker_id: int) -> None:
             logger.info(f"[Queue] Worker {worker_id} processing job {job_id}")
 
             try:
-                # ── Static Analysis ───────────────────────────────────────────
-                analysis_mode = "androguard"
-                flags_dict: Dict[str, Any] = {}
-                all_permissions: list = []
-                package_name = "Unknown"
-                suspicious_strings: list = []
-
-                mobsf_available = await mobsf.is_available()
-                mobsf_report = None
-
-                if mobsf_available:
-                    try:
-                        mobsf_report = await mobsf.analyze(temp_path)
-                        analysis_mode = "mobsf"
-                        package_name = mobsf_report.get("package_name") or "Unknown"
-                        all_permissions = mobsf.get_all_permissions(mobsf_report)
-                        flags_dict = mobsf.extract_flags(mobsf_report)
-                    except (MobSFAnalysisError, MobSFNotAvailable):
-                        mobsf_available = False
-
-                if not mobsf_available:
-                    ag_out = await asyncio.to_thread(analyze_apk, temp_path)
-                    package_name = ag_out.package_name
-                    all_permissions = ag_out.permissions or []
-                    flags_dict = {
-                        "has_accessibility_abuse": ag_out.flags.has_accessibility_abuse,
-                        "has_sms_read_write": ag_out.flags.has_sms_read_write,
-                        "has_system_alert_window": ag_out.flags.has_system_alert_window,
-                        "dangerous_apis_found": ag_out.flags.dangerous_apis_found,
-                        "hardcoded_urls_ips": ag_out.flags.hardcoded_urls_ips,
-                        "targets_indian_banks": ag_out.flags.targets_indian_banks,
-                        "indian_bank_packages_found": ag_out.flags.indian_bank_packages_found,
-                        "obfuscation_score": ag_out.flags.obfuscation_score,
-                        "has_reflection": ag_out.flags.has_reflection,
-                    }
-                    suspicious_strings = ag_out.suspicious_strings
-
-                # ── Frida Dynamic ─────────────────────────────────────────────
-                dynamic_result = None
-                frida_status = get_sandbox_status()
-                if frida_status["ready"]:
-                    try:
-                        dynamic_result = await run_frida_analysis(temp_path, package_name=package_name)
-                        if not dynamic_result.get("available"):
-                            dynamic_result = None
-                    except Exception as fe:
-                        logger.warning(f"[Queue] Frida failed: {fe}")
-
-                # ── Classification ────────────────────────────────────────────
-                flags_model = StaticAnalysisFlags(**flags_dict)
-                family_class, matched_rule = classify_family(flags_model)
-                ai_confidence = 1.0 if family_class == "Unknown" else 1.2
-
-                # ── Threat Correlation ────────────────────────────────────────
-                try:
-                    correlation_raw = await correlate(
-                        sha256=sha256_hash,
-                        urls=flags_dict.get("hardcoded_urls_ips", []),
-                        package_name=package_name,
-                    )
-                except Exception:
-                    correlation_raw = {"available": False}
-
-                if correlation_raw.get("known_family") and family_class == "Unknown":
-                    family_class = correlation_raw["known_family"]
-                    ai_confidence = 1.15
-
-                # ── Risk Score ────────────────────────────────────────────────
-                risk_result = calculate_risk_score(
-                    flags=flags_dict,
-                    ai_confidence=ai_confidence,
-                    dynamic_result=dynamic_result,
-                    correlation_result=correlation_raw,
-                    family=family_class,
-                    all_permissions=all_permissions,
+                # ── Delegate to Shared Pipeline ───────────────────────────────
+                from app.routes.upload import _run_analysis_pipeline, _build_response
+                raw_result = await _run_analysis_pipeline(
+                    temp_path=temp_path,
+                    sha256_hash=sha256_hash,
+                    analyst_id=analyst_id,
                 )
-
-                # ── LLM Intelligence ──────────────────────────────────────────
-                llm_response = await analyze_with_llm(
-                    flags=flags_dict,
-                    family=family_class,
-                    matched_rule=matched_rule,
-                    package_name=package_name,
-                    risk_result=risk_result,
-                    correlation=correlation_raw,
-                    dynamic=dynamic_result,
-                )
-
-                # ── Build slim result for job store ───────────────────────────
-                result = {
-                    "job_id": job_id,
-                    "sha256": sha256_hash,
-                    "package_name": package_name,
-                    "analysis_mode": analysis_mode,
-                    "family_classification": family_class,
-                    "final_risk_score": risk_result["final_risk_score"],
-                    "risk_band": risk_result["risk_band"],
-                    "confidence": risk_result.get("confidence", 70.0),
-                    "dynamic_available": bool(dynamic_result and dynamic_result.get("available")),
-                    "obfuscation_score": flags_dict.get("obfuscation_score", 0.0),
-                    "has_reflection": flags_dict.get("has_reflection", False),
-                    "frs_breakdown": risk_result.get("frs_breakdown", {}),
-                    "threat_scenario_table": risk_result.get("threat_scenario_table", []),
-                    "intelligence_report": llm_response,
-                    "has_accessibility_abuse": flags_dict.get("has_accessibility_abuse", False),
-                    "has_sms_read_write": flags_dict.get("has_sms_read_write", False),
-                    "has_system_alert_window": flags_dict.get("has_system_alert_window", False),
-                    "hardcoded_urls_ips": flags_dict.get("hardcoded_urls_ips", []),
-                    "targets_indian_banks": flags_dict.get("targets_indian_banks", False),
-                    "threat_correlation": correlation_raw,
-                }
-
-                # Persist to DB
-                await save_case(sha256_hash, result, analyst_id=analyst_id)
+                
+                # Build the complete Pydantic response and convert to dict for the queue
+                full_response = _build_response(raw_result, job_id=job_id)
+                result = full_response.model_dump() if hasattr(full_response, "model_dump") else full_response.dict()
 
                 _set_done(job_id, result)
-                logger.info(f"[Queue] Worker {worker_id} completed job {job_id} score={result['final_risk_score']}")
+                logger.info(f"[Queue] Worker {worker_id} completed job {job_id} score={result.get('final_risk_score')}")
 
             except Exception as e:
                 logger.exception(f"[Queue] Worker {worker_id} failed job {job_id}: {e}")

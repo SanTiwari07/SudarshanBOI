@@ -7,10 +7,10 @@ sandbox for the Sudarshan platform.
 
 | Requirement | Status | Notes |
 |---|---|---|
-| `frida` (Python) | ✅ In `requirements.txt` | Auto-installed via `pip` / Docker build |
-| `adb` | ✅ In `Dockerfile` | `android-sdk-platform-tools` installed in container |
-| Android Studio (AVD) | ⚙️ On your HOST machine | Runs the Android emulator |
-| `frida-server` | ⚙️ One-time emulator setup | Steps below |
+| `frida` (Python) | In `requirements.txt` | Auto-installed via `pip` / Docker build |
+| `adb` | In `Dockerfile` | `android-sdk-platform-tools` installed in container |
+| Android Studio (AVD) | On your HOST machine | Runs the Android emulator |
+| `frida-server` | One-time emulator setup | Steps below |
 
 ---
 
@@ -111,7 +111,7 @@ Fraud Intelligence Card (via Ollama + RAG)
 2. Click **Create Device**.
 3. Choose **Pixel 5** (or any phone) → **Next**.
 4. Select a system image — choose **API 29 (Android 10, x86_64)**.  
-   > ⚠️ Use x86_64 for performance. Frida Server builds are available for x86_64.
+   > Warning: Use x86_64 for performance. Frida Server builds are available for x86_64.
 5. Click **Finish**. The emulator will appear in the list.
 6. Click **▶ Play** to start the emulator.
 

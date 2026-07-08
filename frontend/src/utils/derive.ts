@@ -1,6 +1,8 @@
 // src/utils/derive.ts
 // All data derivation utilities — compute rich enterprise panel data from the raw API response.
 
+import React from 'react';
+import { Eye, Smartphone, AppWindow, Settings, Package, Globe, Terminal, Landmark, Link, Search } from 'lucide-react';
 import type { FraudCardData } from '../App';
 
 // ─── Interfaces ────────────────────────────────────────────────────────────────
@@ -43,7 +45,7 @@ export interface ThreatIndicator {
   label: string;
   status: IndicatorStatus;
   description: string;
-  icon: string;
+  icon: React.ReactNode;
 }
 
 export interface NetworkEntry {
@@ -276,61 +278,61 @@ export function getThreatIndicators(data: FraudCardData): ThreatIndicator[] {
       label: 'Accessibility Abuse',
       status: data.has_accessibility_abuse ? 'Detected' : 'Not Detected',
       description: 'BIND_ACCESSIBILITY_SERVICE — can read screen content and inject taps',
-      icon: '👁',
+      icon: React.createElement(Eye, { className: 'h-4 w-4' }),
     },
     {
       label: 'SMS Interception',
       status: data.has_sms_read_write ? 'Detected' : 'Not Detected',
       description: 'READ/RECEIVE_SMS — captures OTPs and 2FA codes',
-      icon: '📱',
+      icon: React.createElement(Smartphone, { className: 'h-4 w-4' }),
     },
     {
       label: 'Overlay Attack',
       status: data.has_system_alert_window ? 'Detected' : 'Not Detected',
       description: 'SYSTEM_ALERT_WINDOW — draws fake login screens over banking apps',
-      icon: '🪟',
+      icon: React.createElement(AppWindow, { className: 'h-4 w-4' }),
     },
     {
       label: 'Dynamic Code Loading',
       status: (hasApi('DexClassLoader') || hasApi('PathClassLoader')) ? 'Detected' : 'Not Detected',
       description: 'Loads new DEX payloads after install — evades static analysis',
-      icon: '⚙️',
+      icon: React.createElement(Settings, { className: 'h-4 w-4' }),
     },
     {
       label: 'Native Library Loading',
       status: hasApi('System.loadLibrary') ? 'Detected' : 'Not Detected',
       description: 'Loads native .so libraries that bypass Java-layer analysis',
-      icon: '📦',
+      icon: React.createElement(Package, { className: 'h-4 w-4' }),
     },
     {
       label: 'WebView Injection',
       status: hasApi('addJavascriptInterface') ? 'Detected' : 'Not Detected',
       description: 'addJavascriptInterface exposes native methods to JavaScript',
-      icon: '🌐',
+      icon: React.createElement(Globe, { className: 'h-4 w-4' }),
     },
     {
       label: 'Shell Execution',
       status: (hasApi('Runtime.exec') || hasApi('ProcessBuilder.start')) ? 'Detected' : 'Not Detected',
       description: 'Executes OS shell commands — privilege escalation vector',
-      icon: '💻',
+      icon: React.createElement(Terminal, { className: 'h-4 w-4' }),
     },
     {
       label: 'Banking App Targeting',
       status: data.targets_indian_banks ? 'Detected' : 'Not Detected',
       description: 'Contains Indian bank package names — targeted overlay campaign',
-      icon: '🏦',
+      icon: React.createElement(Landmark, { className: 'h-4 w-4' }),
     },
     {
       label: 'Hardcoded Network IOCs',
       status: data.hardcoded_urls_ips.length > 0 ? 'Detected' : 'Not Detected',
       description: `${data.hardcoded_urls_ips.length} hardcoded URLs/IPs found in DEX strings`,
-      icon: '🔗',
+      icon: React.createElement(Link, { className: 'h-4 w-4' }),
     },
     {
       label: 'Anti-Analysis / Root Detection',
       status: 'Unknown',
       description: 'Dynamic sandbox required to confirm root detection routines',
-      icon: '🔍',
+      icon: React.createElement(Search, { className: 'h-4 w-4' }),
     },
   ];
 }

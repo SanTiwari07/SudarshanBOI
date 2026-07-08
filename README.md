@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>🛡️ Sudarshan</h1>
+  <h1>Sudarshan</h1>
   <p><b>Enterprise-Grade AI-Powered Mobile Security & Threat Intelligence Platform</b></p>
   <p>
     <a href="https://github.com/your-org/sudarshan/actions"><img src="https://img.shields.io/github/actions/workflow/status/your-org/sudarshan/ci.yml?branch=main" alt="Build Status"></a>
@@ -10,7 +10,7 @@
 
 ---
 
-## 📖 Project Overview
+## Project Overview
 
 **Sudarshan** is a comprehensive, production-grade cybersecurity platform engineered to detect, analyze, and mitigate threats targeting mobile applications and APIs.
 
@@ -28,28 +28,28 @@ Modern threats such as banking trojans, spyware, and API abuse are designed to e
 
 ---
 
-## ✨ Features
+## Features
 
 Sudarshan provides an end-to-end suite of analysis tools:
 
-- 🔍 **Static Analysis**: Deep decompilation, manifest parsing, and code flow analysis to uncover vulnerabilities without executing the application.
-- ⚡ **Dynamic Analysis**: Real-time behavior monitoring, hooking, and memory introspection to detect runtime evasion techniques.
-- 🦠 **Malware Detection**: Multi-engine scanning combining heuristics, signatures, and AI models to identify known and zero-day malware.
-- 💳 **Fraud Detection**: specialized detection for banking trojans, overlay attacks, and SMS interception mechanisms.
-- 🧠 **LLM Investigation**: Utilize local or cloud-based LLMs to semantically analyze decompiled code, providing plain-English explanations of malicious intent.
-- 🤖 **AI Agents**: Autonomous agents that can trace execution paths, hunt for specific vulnerabilities, and construct attack narratives.
-- 📊 **Risk Scoring**: A unified, quantifiable risk score (0-100) generated for every application based on aggregated threat vectors.
-- 📱 **APK Analysis**: End-to-end pipeline for unpacking, parsing, and analyzing Android application packages.
-- 🔗 **MobSF Integration**: Seamlessly integrates with the Mobile Security Framework for enterprise-grade static analysis reporting.
-- 🪝 **Frida Integration**: Automated Frida script generation and injection for advanced dynamic analysis and hooking on physical or emulated devices.
-- 🐳 **Docker Deployment**: Fully containerized architecture ensuring consistent environments and effortless scaling.
-- 🌐 **REST APIs**: Comprehensive, well-documented APIs enabling easy integration with external SIEMs and orchestration tools.
-- 📈 **Dashboard**: A React-based, highly responsive dashboard for visualizing threats, managing tasks, and reviewing analysis results.
-- 📄 **Report Generation**: Automated generation of compliance-ready PDF and HTML security reports.
+- **Static Analysis**: Deep decompilation, manifest parsing, and code flow analysis to uncover vulnerabilities without executing the application.
+- **Dynamic Analysis**: Real-time behavior monitoring, hooking, and memory introspection to detect runtime evasion techniques.
+- **Malware Detection**: Multi-engine scanning combining heuristics, signatures, and AI models to identify known and zero-day malware.
+- **Fraud Detection**: specialized detection for banking trojans, overlay attacks, and SMS interception mechanisms.
+- **LLM Investigation**: Utilize local or cloud-based LLMs to semantically analyze decompiled code, providing plain-English explanations of malicious intent.
+- **AI Agents**: Autonomous agents that can trace execution paths, hunt for specific vulnerabilities, and construct attack narratives.
+- **Risk Scoring**: A unified, quantifiable risk score (0-100) generated for every application based on aggregated threat vectors.
+- **APK Analysis**: End-to-end pipeline for unpacking, parsing, and analyzing Android application packages.
+- **MobSF Integration**: Seamlessly integrates with the Mobile Security Framework for enterprise-grade static analysis reporting.
+- **Frida Integration**: Automated Frida script generation and injection for advanced dynamic analysis and hooking on physical or emulated devices.
+- **Docker Deployment**: Fully containerized architecture ensuring consistent environments and effortless scaling.
+- **REST APIs**: Comprehensive, well-documented APIs enabling easy integration with external SIEMs and orchestration tools.
+- **Dashboard**: A React-based, highly responsive dashboard for visualizing threats, managing tasks, and reviewing analysis results.
+- **Report Generation**: Automated generation of compliance-ready PDF and HTML security reports.
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 Sudarshan leverages modern, scalable technologies to deliver high performance:
 
@@ -66,7 +66,7 @@ Sudarshan leverages modern, scalable technologies to deliver high performance:
 
 ---
 
-## 📁 Folder Structure
+## Folder Structure
 
 ```text
 Sudarshan/
@@ -99,7 +99,7 @@ Sudarshan/
 
 ---
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 Sudarshan employs a microservices-oriented architecture designed for horizontal scalability and high throughput. 
 
@@ -113,7 +113,7 @@ At a high level, the system consists of:
 
 ---
 
-## 🖼️ Screenshots
+## Screenshots
 
 *(Placeholders for future UI screenshots)*
 
@@ -123,7 +123,7 @@ At a high level, the system consists of:
 
 ---
 
-## 🚀 Installation & Quick Start
+## Installation & Quick Start
 
 Sudarshan is designed to be easy to spin up using Docker.
 
@@ -140,7 +140,7 @@ Access the dashboard at `http://localhost:5173` and the API at `http://localhost
 
 ---
 
-## ⚙️ Configuration & Environment Variables
+## Configuration & Environment Variables
 
 The system relies on environment variables defined in the `.env` file. Key variables include:
 
@@ -151,7 +151,7 @@ The system relies on environment variables defined in the `.env` file. Key varia
 
 ---
 
-## 📖 API Overview
+## API Overview
 
 The backend provides a comprehensive OpenAPI specification (Swagger UI) accessible at `/docs` when the server is running. It includes endpoints for:
 - `/api/v1/upload`: Upload an APK for analysis.
@@ -161,7 +161,7 @@ The backend provides a comprehensive OpenAPI specification (Swagger UI) accessib
 
 ---
 
-## 🗺️ Future Roadmap
+## Future Roadmap
 
 - [ ] **Cloud-Native Deployment**: Kubernetes Helm charts for distributed cloud deployment.
 - [ ] **iOS Support**: Integration with iOS static/dynamic analysis tools.
@@ -170,14 +170,14 @@ The backend provides a comprehensive OpenAPI specification (Swagger UI) accessib
 
 ---
 
-## 🤝 Contribution Guide
+## Contribution Guide
 
 We welcome contributions from the community! Whether it's adding new threat signatures, improving the UI, or fixing bugs, your help is appreciated.
 Please review our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on code standards, pull requests, and setting up the development environment.
 
 ---
 
-## ❓ Troubleshooting
+## Troubleshooting
 
 Encountering issues? 
 - Check the [HOW_TO_RUN.md](HOW_TO_RUN.md) Troubleshooting section for common errors (Port conflicts, Docker issues, ADB connection failures).
@@ -185,6 +185,6 @@ Encountering issues?
 
 ---
 
-## 📜 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

@@ -109,13 +109,22 @@ class MobSFClient:
         self.headers = {"Authorization": self.api_key} if self.api_key else {}
 
     async def is_available(self) -> bool:
-        """Quick health check — returns True if MobSF responds."""
-        try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
-                r = await client.get(f"{self.host}/api/v1/api_docs", headers=self.headers)
-                return r.status_code in (200, 302)
-        except Exception:
-            return False
+        """Quick health check — returns True if MobSF responds. Includes retries."""
+        for attempt in range(3):
+            try:
+                async with httpx.AsyncClient(timeout=5.0) as client:
+                    r = await client.get(f"{self.host}/api_docs", headers=self.headers)
+                    if r.status_code in (200, 302, 401, 403):
+                        return True
+                    logger.warning(f"MobSF health check unexpected status: {r.status_code}")
+            except Exception as e:
+                logger.warning(f"MobSF health check attempt {attempt + 1} failed: {e}")
+            
+            if attempt < 2:
+                await asyncio.sleep(2)
+        
+        logger.error("MobSF is completely unavailable after retries.")
+        return False
 
     async def upload(self, apk_path: str) -> str:
         """
@@ -183,22 +192,28 @@ class MobSFClient:
         Returns a normalized dict consumed by Sudarshan's engines.
         Falls back to empty_report on any failure.
         """
-        try:
-            scan_hash = await self.upload(apk_path)
-            await self.scan(scan_hash)
+        max_retries = 3
+        
+        for attempt in range(max_retries):
+            try:
+                logger.info(f"MobSF analysis attempt {attempt + 1}/{max_retries} for {apk_path}")
+                scan_hash = await self.upload(apk_path)
+                await self.scan(scan_hash)
 
-            # MobSF analysis typically takes 30–120 seconds
-            # The scan endpoint is synchronous on the server side
-            raw = await self.get_report(scan_hash)
-            scorecard = await self.get_scorecard(scan_hash)
+                # MobSF analysis typically takes 30–120 seconds
+                # The scan endpoint is synchronous on the server side
+                raw = await self.get_report(scan_hash)
+                scorecard = await self.get_scorecard(scan_hash)
 
-            return self._parse_report(raw, scorecard, scan_hash)
+                return self._parse_report(raw, scorecard, scan_hash)
 
-        except MobSFNotAvailable:
-            raise
-        except Exception as e:
-            logger.error(f"MobSF analysis failed: {e}")
-            raise MobSFAnalysisError(str(e))
+            except MobSFNotAvailable:
+                raise
+            except Exception as e:
+                logger.error(f"MobSF analysis failed on attempt {attempt + 1}: {e}")
+                if attempt == max_retries - 1:
+                    raise MobSFAnalysisError(str(e))
+                await asyncio.sleep(2.0 ** (attempt + 1))
 
     def _parse_report(
         self, raw: Dict[str, Any], scorecard: Dict[str, Any], scan_hash: str

@@ -44,13 +44,19 @@ function emit(category, data) {
 
 // ─── [A] Accessibility Service Hooks ─────────────────────────────────────────
 
-setImmediate(function () {
-  if (typeof Java === 'undefined' || !Java.available) {
-    send({ type: 'error', description: 'Java is not available. This may be a native process or architecture mismatch.' });
-    return;
+function waitForJava() {
+  if (typeof Java !== 'undefined' && Java.available) {
+    initHooks();
+  } else {
+    setTimeout(waitForJava, 100);
   }
+}
 
-  Java.perform(function () {
+setImmediate(waitForJava);
+
+function initHooks() {
+  try {
+    Java.perform(function () {
 
 try {
   var AccessibilityService = Java.use('android.accessibilityservice.AccessibilityService');
@@ -294,7 +300,10 @@ try {
 
 // ─── Heartbeat ────────────────────────────────────────────────────────────────
 
-  }); // end Java.perform
-}); // end setImmediate
-
-send({ type: 'ready', message: 'SUDARSHAN Frida hooks loaded — monitoring banking trojan behavior' });
+    }); // end Java.perform
+    
+    send({ type: 'ready', message: 'SUDARSHAN Frida hooks loaded — monitoring banking trojan behavior' });
+  } catch (e) {
+    send({ type: 'error', description: 'Exception during hook initialization: ' + e.message });
+  }
+} // end initHooks

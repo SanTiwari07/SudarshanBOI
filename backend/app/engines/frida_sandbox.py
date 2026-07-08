@@ -139,8 +139,16 @@ def get_connected_emulators() -> List[str]:
 
 
 def _adb_install_apk(apk_path: str, device: str) -> Tuple[bool, str]:
-    """Install an APK onto the target device."""
-    return _adb("-s", device, "install", "-r", "-t", apk_path, timeout=120)
+    """Install an APK onto the target device with retries."""
+    last_out = ""
+    for attempt in range(3):
+        ok, out = _adb("-s", device, "install", "-r", "-t", apk_path, timeout=120)
+        if ok:
+            return ok, out
+        last_out = out
+        logger.warning(f"[Frida] APK install attempt {attempt+1} failed: {out}")
+        time.sleep(2)
+    return False, f"Failed to install APK after 3 attempts. Last error: {last_out}"
 
 
 def _get_package_name_from_apk(apk_path: str) -> Optional[str]:
@@ -293,11 +301,40 @@ class FridaSession:
         try:
             logger.info(f"[Frida] Connecting to device {self.device_serial}")
             manager = frida.get_device_manager()
-            device = manager.get_device(self.device_serial, timeout=10)
+            device = None
+            for attempt in range(3):
+                try:
+                    device = manager.get_device(self.device_serial, timeout=10)
+                    break
+                except Exception as e:
+                    logger.warning(f"[Frida] Device connect attempt {attempt+1} failed: {e}")
+                    time.sleep(2)
+            if not device:
+                raise Exception("Failed to get device after 3 attempts")
 
             logger.info(f"[Frida] Attaching to {self.package_name}")
-            pid = device.spawn([self.package_name])
-            self._session = device.attach(pid)
+            pid = None
+            for attempt in range(3):
+                try:
+                    pid = device.spawn([self.package_name])
+                    break
+                except Exception as e:
+                    logger.warning(f"[Frida] Spawn attempt {attempt+1} failed: {e}")
+                    time.sleep(2)
+            if not pid:
+                raise Exception("Failed to spawn app after 3 attempts")
+
+            self._session = None
+            for attempt in range(3):
+                try:
+                    self._session = device.attach(pid)
+                    break
+                except Exception as e:
+                    logger.warning(f"[Frida] Attach attempt {attempt+1} failed: {e}")
+                    time.sleep(2)
+            if not self._session:
+                raise Exception("Failed to attach to app after 3 attempts")
+            
             self._script = self._session.create_script(script_source)
             self._script.on("message", self._on_message)
             self._script.load()
@@ -349,7 +386,14 @@ async def run_frida_analysis(apk_path: str, package_name: Optional[str] = None) 
     }
 
     # ── Step 1: Find emulator ──────────────────────────────────────────────────
-    emulators = get_connected_emulators()
+    emulators = []
+    for attempt in range(3):
+        emulators = get_connected_emulators()
+        if emulators:
+            break
+        logger.warning(f"[Frida] No emulators found, attempt {attempt+1}. Retrying in 2s...")
+        await asyncio.sleep(2)
+        
     if not emulators:
         logger.warning("[Frida] No Android emulators connected. Start an AVD in Android Studio.")
         base_result["error"] = "No emulator connected. Start an AVD in Android Studio."
@@ -359,8 +403,8 @@ async def run_frida_analysis(apk_path: str, package_name: Optional[str] = None) 
     logger.info(f"[Frida] Using emulator: {device_serial}")
 
     # ── Step 2: Extract package name ───────────────────────────────────────────
+    loop = asyncio.get_event_loop()
     if not package_name:
-        loop = asyncio.get_event_loop()
         package_name = await loop.run_in_executor(None, _get_package_name_from_apk, apk_path)
         
     if not package_name:

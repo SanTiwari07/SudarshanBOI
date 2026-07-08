@@ -178,7 +178,7 @@ async def _run_analysis_pipeline(
     if frida_status["ready"]:
         logger.info("Frida sandbox ready — running dynamic behavioral analysis")
         try:
-            dynamic_result = await run_frida_analysis(temp_path)
+            dynamic_result = await run_frida_analysis(temp_path, package_name=package_name)
             if dynamic_result.get("available"):
                 logger.info(f"Frida BFCI={dynamic_result.get('bfci', 0):.1f}")
             else:
