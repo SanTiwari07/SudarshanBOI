@@ -93,6 +93,22 @@ export type CodeFinding = {
   files: string[];
 };
 
+export type DynamicAnalysis = {
+  available: boolean;
+  activities_triggered: string[];
+  network_logs: string[];
+  api_calls: string[];
+  files_accessed: string[];
+  screenshots: string[];
+  logcat: string;
+  multi_stage_summary: Record<string, any>;
+  coverage_metrics: Record<string, any>;
+  attack_timeline: any[];
+  clicked_nodes: string[];
+  anti_analysis_events: any[];
+  yara_matches: any[];
+};
+
 export type FraudCardData = {
   // Identity
   sha256: string;
@@ -132,6 +148,7 @@ export type FraudCardData = {
   // Threat intelligence
   threat_correlation?: ThreatCorrelation;
   dynamic_available: boolean;
+  dynamic_analysis?: DynamicAnalysis;
 
   // MobSF enrichment
   manifest_findings: ManifestFinding[];

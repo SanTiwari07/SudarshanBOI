@@ -674,9 +674,9 @@ async def run_frida_analysis(apk_path: str, package_name: Optional[str] = None) 
     )
     if "frida-server" not in out:
         logger.info("[Frida] frida-server not running, starting it automatically...")
-        # Assume it's located at /data/local/tmp/frida-server per instructions
+        # Since adb is running as root, we can run it directly and background it
         await asyncio.get_event_loop().run_in_executor(
-            None, _adb, "-s", device_serial, "shell", "su -c '/data/local/tmp/frida-server &'"
+            None, _adb, "-s", device_serial, "shell", "nohup /data/local/tmp/frida-server > /dev/null 2>&1 &"
         )
         await asyncio.sleep(2) # Give it time to start up
 
