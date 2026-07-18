@@ -1,0 +1,125 @@
+# Changelog — Sudarshan Enterprise Platform
+
+All notable changes to this project are documented in this file.
+
+---
+
+## [RC-1] — 2026-07-19
+
+### 🐛 Bug Fixes
+
+#### `frida-server` Startup Failure (Critical)
+- **File:** `backend/app/engines/frida_sandbox.py`
+- **Problem:** The backend used `adb shell su -c '/data/local/tmp/frida-server &'`
+  to automatically start `frida-server` on the Android emulator. On emulators
+  where the `su` binary does not support the `-c` argument (`su: invalid uid/gid '-c'`),
+  this command silently failed — meaning `frida-server` was never running and all
+  dynamic analysis was skipped without any visible error in the UI.
+- **Fix:** Replaced `su -c` with `nohup /data/local/tmp/frida-server > /dev/null 2>&1 &`.
+  Since `adbd` is already running as root (`adb root`), direct execution is portable
+  and works on all AVD emulator configurations.
+
+#### Missing Dynamic Analysis in Dashboard (Critical)
+- **File:** `frontend/src/App.tsx`
+- **Problem:** The `FraudCardData` TypeScript interface was missing the `dynamic_analysis`
+  field. The backend API correctly returned the full `DynamicAnalysisResult` payload,
+  but the frontend type system silently dropped it. As a result, the `DynamicAnalysisPanel`
+  in `TechnicalView.tsx` always rendered "Dynamic analysis data unavailable".
+- **Fix:** Added the `DynamicAnalysis` TypeScript type and mapped it to `FraudCardData`.
+  The panel now correctly displays runtime API call hooks, network traffic, attack
+  timelines, coverage metrics, and screenshots captured during Frida instrumentation.
+
+### ✨ New Features
+
+#### One-Command Startup Script (`start.ps1`)
+- **File:** `start.ps1` (project root)
+- **Description:** A PowerShell script that replaces the multi-step manual startup
+  process. Previously, starting the platform required 5+ separate commands
+  (`adb kill-server`, `adb tcpip 5555`, `adb root`, `frida-server` launch,
+  `docker compose up`) run in the right order.
+- **Now:** Run `.\start.ps1` and everything starts automatically with status feedback.
+- **Features:**
+  - Kills stale ADB server and restarts fresh
+  - Enables ADB TCP mode on the emulator
+  - Restarts `adbd` as root
+  - Kills any stale `frida-server` process and launches a fresh instance
+  - Verifies `frida-server` is actually running before proceeding
+  - Launches `docker compose up`
+  - Prints URLs for frontend, backend, and MobSF
+
+### 📝 Documentation
+
+#### `README.md` (New)
+- Created comprehensive project-level README with architecture diagram, API reference,
+  configuration table, project structure, and quick start guide.
+
+#### `backend/README_FRIDA.md` (Updated)
+- Added ⚡ Quick Start section referencing `start.ps1`.
+- Updated `frida-server` version references from `17.15.3` → `17.16.1`.
+- Updated startup command from `su -c` to `nohup` method with explanation.
+- Added "Known Limitations" section covering emulator reboot requirements and Git LFS constraints.
+- Added `start.ps1` to the Files Reference table.
+
+---
+
+## [Beta] — 2026-07-18
+
+### ✨ Features Implemented
+
+#### Full Analysis Pipeline
+- APK upload → Static Analysis (Androguard fallback / MobSF primary)
+- Frida dynamic sandbox (multi-stage engine with UI Explorer)
+- Threat correlation (VirusTotal, AbuseIPDB, OTX)
+- FRS scoring engine with 5-axis STEI breakdown
+- AI intelligence report (Gemini API / Ollama)
+- SQLite case persistence
+
+#### React Frontend
+- **Upload page** — Drag-and-drop APK upload with real-time progress
+- **Fraud Analyst Card** — Executive risk summary with BFCI gauge
+- **SOC / Technical View** — Full static + dynamic evidence panels
+  - Explainability Engine
+  - APK Metadata
+  - Threat Indicators Checklist
+  - Permission Analysis Table
+  - Dangerous API Table
+  - Network Intelligence
+  - IOC Reputation Panel
+  - **Dynamic Sandbox Execution Panel** — Multi-stage summary, attack timeline,
+    coverage metrics, screenshots
+  - Risk Scoring Breakdown (5-axis STEI)
+- **Threat Intel View** — IOC reputation, MITRE ATT&CK mapping
+- **Case History** — Paginated list of all past analyses
+- **JWT Authentication** — Role-based (analyst / soc_lead / admin)
+
+#### Docker Stack
+- `backend` — FastAPI + Uvicorn
+- `frontend` — Vite + React (dev server)
+- `mobsf` — Mobile Security Framework v4.5.1
+
+#### ADB / Frida Networking
+- Backend connects to host emulator via `host.docker.internal:5555` (Docker Desktop)
+- `ADB_HOST` / `ADB_PORT` configurable via `.env`
+- Graceful fallback to static-only analysis if sandbox unreachable
+
+### 🐛 Bug Fixes (During Beta)
+
+- **Docker ADB Connection Silent Failure**: `get_sandbox_status()` now actively
+  probes ADB TCP connection instead of assuming connectivity from env variables.
+- **Missing Dynamic Intelligence in API Payload**: Expanded `AnalysisResponse`
+  Pydantic schema and updated `/analyze` route to extract full `UIExplorer`
+  outputs (attack timeline, coverage metrics, screenshots, anti-analysis events)
+  into the API response.
+- **STEI Score Redistribution**: When dynamic analysis is unavailable, STEI
+  weight increases from 25% → 50% in the FRS formula automatically.
+
+---
+
+## Known Issues (Open)
+
+| Issue | Impact | Workaround |
+|-------|--------|------------|
+| `frida-server` not persistent across emulator reboots | Dynamic analysis fails after emulator restart | Run `.\start.ps1` which re-launches `frida-server` automatically |
+| `frida-server` binary not in Git (>100 MB) | New developers must set it up manually | Follow Step 2 in `backend/README_FRIDA.md` |
+| Ollama AI reports require local Ollama installation | AI narrative defaults to static template | Install Ollama locally or set `GEMINI_API_KEY` in `.env` |
+| MobSF "username already taken" warning on restart | Cosmetic warning, no functional impact | Safe to ignore |
