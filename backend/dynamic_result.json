@@ -1,1 +1,48 @@
-{"available": false, "engine": "frida", "bfci": 0.0, "bfci_components": {}, "bfci_weights": {"accessibility": 0.35, "sms": 0.25, "overlay": 0.2, "banking": 0.1, "network": 0.05, "persistence": 0.05}, "activities_triggered": [], "network_logs": [], "api_calls": [], "files_accessed": [], "screenshots": [], "logcat": "", "evidence": [], "hook_errors": [], "duration_seconds": 30, "error": "Frida attach failed. Ensure frida-server is running on emulator."}
+{
+  "available": true,
+  "engine": "frida",
+  "bfci": 0.0,
+  "bfci_components": {
+    "accessibility": 0.0,
+    "sms": 0.0,
+    "overlay": 0.0,
+    "banking": 0.0,
+    "network": 0.0,
+    "persistence": 0.0
+  },
+  "bfci_weights": {
+    "accessibility": 0.35,
+    "sms": 0.25,
+    "overlay": 0.2,
+    "banking": 0.1,
+    "network": 0.05,
+    "persistence": 0.05
+  },
+  "activities_triggered": [
+    "com.android.insecurebankv2"
+  ],
+  "network_logs": [],
+  "api_calls": [],
+  "files_accessed": [],
+  "screenshots": [],
+  "logcat": "",
+  "evidence": [],
+  "hook_errors": [],
+  "duration_seconds": 30,
+  "package_name": "com.android.insecurebankv2",
+  "device": "emulator-5554",
+  "bfci_evidence": [],
+  "raw_event_counts": {
+    "accessibility": 0,
+    "sms": 0,
+    "overlay": 0,
+    "banking": 0,
+    "network": 0,
+    "persistence": 0,
+    "dangerous_apis": 0,
+    "files_accessed": 0,
+    "anti_analysis": 0
+  },
+  "evidence_record_count": 0,
+  "anti_analysis_events": 0
+}

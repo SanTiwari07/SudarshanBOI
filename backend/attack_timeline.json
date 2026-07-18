@@ -1,0 +1,51 @@
+[
+    {
+        "timestamp": "00:00",
+        "source": "System",
+        "action": "Analysis Started",
+        "details": "Explorer Mode: ai"
+    },
+    {
+        "timestamp": "00:02",
+        "source": "AI",
+        "action": "tap",
+        "target": "node_4",
+        "details": "Deterministic chose tap on node node_4 (Deterministic match for 'login')"
+    },
+    {
+        "timestamp": "00:06",
+        "source": "AI",
+        "action": "swipe",
+        "details": "Swiping to unblock UI"
+    },
+    {
+        "timestamp": "00:11",
+        "source": "AI",
+        "action": "swipe",
+        "details": "Swiping to unblock UI"
+    },
+    {
+        "timestamp": "00:15",
+        "source": "AI",
+        "action": "swipe",
+        "details": "Swiping to unblock UI"
+    },
+    {
+        "timestamp": "00:20",
+        "source": "AI",
+        "action": "swipe",
+        "details": "Swiping to unblock UI"
+    },
+    {
+        "timestamp": "00:24",
+        "source": "AI",
+        "action": "swipe",
+        "details": "Swiping to unblock UI"
+    },
+    {
+        "timestamp": "00:28",
+        "source": "AI",
+        "action": "swipe",
+        "details": "Swiping to unblock UI"
+    }
+]

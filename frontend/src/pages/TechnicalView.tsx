@@ -413,7 +413,7 @@ function TopEvidencePanel({ data }: { data: FraudCardData }) {
 // ─── Raw Evidence Tabs ────────────────────────────────────────────────────────────
 
 function RawEvidenceTabs({ data }: { data: FraudCardData }) {
-  type TabKey = 'permissions' | 'strings' | 'urls' | 'apis' | 'manifest';
+  type TabKey = 'permissions' | 'strings' | 'urls' | 'apis' | 'manifest' | 'dynamic_apis';
   const [activeTab, setActiveTab] = useState<TabKey>('permissions');
   const [search, setSearch] = useState('');
 
@@ -421,8 +421,9 @@ function RawEvidenceTabs({ data }: { data: FraudCardData }) {
     { key: 'permissions', label: 'Permissions', count: data.all_permissions.length },
     { key: 'strings', label: 'Strings', count: data.technical_view.strings_fired.length },
     { key: 'urls', label: 'URLs / IPs', count: data.hardcoded_urls_ips.length },
-    { key: 'apis', label: 'APIs', count: data.technical_view.apis_fired.length },
+    { key: 'apis', label: 'Static APIs', count: data.technical_view.apis_fired.length },
     { key: 'manifest', label: 'Manifest', count: data.technical_view.decoded_manifest_excerpts.length },
+    ...(data.dynamic_available && data.dynamic_analysis ? [{ key: 'dynamic_apis' as TabKey, label: 'Runtime Calls (Frida)', count: data.dynamic_analysis.api_calls?.length || 0 }] : []),
   ];
 
   const rawContent: Record<TabKey, string[]> = {
@@ -431,6 +432,7 @@ function RawEvidenceTabs({ data }: { data: FraudCardData }) {
     urls: data.hardcoded_urls_ips,
     apis: data.technical_view.apis_fired,
     manifest: data.technical_view.decoded_manifest_excerpts,
+    dynamic_apis: data.dynamic_analysis?.api_calls?.map(c => typeof c === 'string' ? c : JSON.stringify(c)) || [],
   };
 
   const items = rawContent[activeTab].filter(s =>
@@ -631,6 +633,105 @@ function RiskScoringBreakdown({ data }: { data: FraudCardData }) {
   );
 }
 
+// ─── Dynamic Analysis Panel ────────────────────────────────────────────────────────
+
+function DynamicAnalysisPanel({ data }: { data: FraudCardData }) {
+  if (!data.dynamic_available || !data.dynamic_analysis) {
+    return (
+      <SocCard>
+        <SectionHeader icon={<Terminal className="h-4 w-4" />} title="Dynamic Sandbox Execution" subtitle="Frida & ADB UI Explorer" />
+        <div className="p-6 text-center text-sm text-gray-400">Dynamic analysis data unavailable or disabled</div>
+      </SocCard>
+    );
+  }
+
+  const dyn = data.dynamic_analysis;
+  
+  // Format coverage
+  const cov = dyn.coverage_metrics || {};
+  const coverageHtml = cov.total_activities ? (
+    <div className="text-sm">
+      <div className="flex justify-between text-gray-600 mb-1">
+        <span>Activity Coverage</span>
+        <span>{((cov.covered_activities / cov.total_activities) * 100).toFixed(1)}%</span>
+      </div>
+      <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+        <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${(cov.covered_activities / cov.total_activities) * 100}%` }}></div>
+      </div>
+      <div className="text-xs text-gray-500 mt-2 text-right">{cov.covered_activities} of {cov.total_activities} activities reached</div>
+    </div>
+  ) : <span className="text-gray-400 text-sm">No coverage data</span>;
+
+  return (
+    <SocCard>
+      <SectionHeader icon={<Terminal className="h-4 w-4" />} title="Dynamic Sandbox Execution" subtitle="Multi-Stage Frida & UI Explorer Results" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 divide-x divide-y divide-gray-100">
+        
+        {/* Execution Summary */}
+        <div className="p-4">
+          <h3 className="text-xs font-semibold uppercase text-gray-500 mb-3">Multi-Stage Summary</h3>
+          {Object.keys(dyn.multi_stage_summary || {}).length > 0 ? (
+            <div className="space-y-2">
+              {Object.entries(dyn.multi_stage_summary).map(([stage, res]: [string, any]) => (
+                <div key={stage} className="flex justify-between items-center bg-gray-50 p-2 rounded text-sm">
+                  <span className="font-mono text-xs truncate mr-2" title={stage}>{stage}</span>
+                  <span className={`px-2 py-0.5 rounded text-xs font-medium flex-shrink-0 ${res.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                    {res.success ? 'Success' : 'Failed'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : <div className="text-sm text-gray-400">No multi-stage summary available</div>}
+        </div>
+
+        {/* Coverage Metrics */}
+        <div className="p-4">
+          <h3 className="text-xs font-semibold uppercase text-gray-500 mb-3">UI Coverage</h3>
+          {coverageHtml}
+        </div>
+
+        {/* Timeline */}
+        <div className="p-4 lg:row-span-2 overflow-y-auto max-h-96">
+          <h3 className="text-xs font-semibold uppercase text-gray-500 mb-3">Attack Timeline</h3>
+          {(dyn.attack_timeline || []).length > 0 ? (
+            <div className="space-y-4 border-l-2 border-gray-100 ml-2 pl-3 pb-2 mt-2">
+              {dyn.attack_timeline.map((evt: any, i: number) => (
+                <div key={i} className="relative">
+                  <div className="absolute -left-[21px] top-1 h-3 w-3 rounded-full bg-blue-100 border-2 border-blue-500"></div>
+                  <div className="text-xs text-gray-400 font-mono mb-0.5">Stage {evt.stage_index + 1}</div>
+                  <div className="text-sm font-medium text-gray-800">{evt.action_type === 'INPUT' ? `Typed "${evt.text}"` : `Clicked node`}</div>
+                  {evt.target_node && <div className="text-xs font-mono text-gray-500 truncate" title={evt.target_node}>{evt.target_node}</div>}
+                </div>
+              ))}
+            </div>
+          ) : <div className="text-sm text-gray-400">No timeline data</div>}
+        </div>
+
+        {/* Screenshots */}
+        <div className="p-4 lg:col-span-2">
+          <h3 className="text-xs font-semibold uppercase text-gray-500 mb-3">Screenshots (Simulated)</h3>
+          {(dyn.screenshots || []).length > 0 ? (
+             <div className="flex gap-4 overflow-x-auto pb-2">
+               {dyn.screenshots.map((s: string, i: number) => (
+                 <div key={i} className="flex-shrink-0 w-32 border border-gray-200 rounded overflow-hidden shadow-sm">
+                   <div className="h-48 bg-gray-100 flex items-center justify-center relative">
+                     <span className="text-gray-500 text-[10px] text-center p-2 break-all z-10">{s.split('/').pop()}</span>
+                     <div className="absolute inset-0 opacity-10 flex flex-col justify-between p-2">
+                        <div className="h-4 bg-gray-400 rounded w-3/4"></div>
+                        <div className="h-20 bg-gray-400 rounded w-full"></div>
+                        <div className="h-6 bg-gray-400 rounded w-1/2 mx-auto"></div>
+                     </div>
+                   </div>
+                 </div>
+               ))}
+             </div>
+          ) : <div className="text-sm text-gray-400 flex h-24 items-center justify-center border-2 border-dashed border-gray-100 rounded">No screenshots captured</div>}
+        </div>
+      </div>
+    </SocCard>
+  );
+}
+
 // ─── Main TechnicalView Page ──────────────────────────────────────────────────────
 
 export default function TechnicalView({ data }: { data: FraudCardData | null }) {
@@ -680,7 +781,10 @@ export default function TechnicalView({ data }: { data: FraudCardData | null }) 
       {/* Row 6: IOC Panel */}
       <IOCPanel data={data} />
 
-      {/* Row 7: Risk Scoring Breakdown */}
+      {/* Row 7: Dynamic Analysis */}
+      <DynamicAnalysisPanel data={data} />
+
+      {/* Row 8: Risk Scoring Breakdown */}
       <RiskScoringBreakdown data={data} />
     </div>
   );

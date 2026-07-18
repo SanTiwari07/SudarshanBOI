@@ -178,7 +178,9 @@ async def _run_analysis_pipeline(
     if frida_status["ready"]:
         logger.info("Frida sandbox ready — running dynamic behavioral analysis")
         try:
-            dynamic_result = await run_frida_analysis(temp_path, package_name=package_name)
+            from app.engines.multi_stage_engine import MultiStageEngine
+            engine = MultiStageEngine(apk_path=temp_path, package_name=package_name)
+            dynamic_result = await engine.run_all_stages()
             if dynamic_result.get("available"):
                 logger.info(f"Frida BFCI={dynamic_result.get('bfci', 0):.1f}")
             else:
@@ -383,6 +385,14 @@ def _build_response(result: Dict[str, Any], job_id: Optional[str] = None) -> Ana
             network_logs=dynamic_result.get("network_logs", []) if dynamic_result else [],
             api_calls=dynamic_result.get("api_calls", []) if dynamic_result else [],
             files_accessed=dynamic_result.get("files_accessed", []) if dynamic_result else [],
+            screenshots=dynamic_result.get("screenshots", []) if dynamic_result else [],
+            logcat=dynamic_result.get("logcat", "") if dynamic_result else "",
+            multi_stage_summary=dynamic_result.get("multi_stage_summary", {}) if dynamic_result else {},
+            coverage_metrics=dynamic_result.get("coverage_metrics", {}) if dynamic_result else {},
+            attack_timeline=dynamic_result.get("attack_timeline", []) if dynamic_result else [],
+            clicked_nodes=list(dynamic_result.get("clicked_nodes", [])) if dynamic_result else [],
+            anti_analysis_events=dynamic_result.get("anti_analysis_events", []) if dynamic_result else [],
+            yara_matches=dynamic_result.get("yara_matches", []) if dynamic_result else [],
         ) if dynamic_result else None,
         dynamic_available=result["dynamic_available"],
         manifest_findings=result["manifest_findings"],

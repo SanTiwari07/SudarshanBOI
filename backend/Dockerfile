@@ -25,4 +25,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "find /app -name '*.pyc' -delete -o -name '__pycache__' -type d -exec rm -rf {} + 2>/dev/null; exec uvicorn app.main:app --host 0.0.0.0 --port 8000"]

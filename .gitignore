@@ -106,3 +106,4 @@ out/
 # Project Specific
 backend_logs_output.txt
 get_logs.py
+frida-server-*/

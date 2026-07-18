@@ -108,6 +108,12 @@ class DynamicAnalysisResult(BaseModel):
     files_accessed: List[str] = Field(default_factory=list)
     screenshots: List[str] = Field(default_factory=list)
     logcat: str = ""
+    multi_stage_summary: Dict[str, Any] = Field(default_factory=dict)
+    coverage_metrics: Dict[str, int] = Field(default_factory=dict)
+    attack_timeline: List[Dict[str, Any]] = Field(default_factory=list)
+    clicked_nodes: List[str] = Field(default_factory=list)
+    anti_analysis_events: List[Dict[str, Any]] = Field(default_factory=list)
+    yara_matches: List[str] = Field(default_factory=list)
 
 
 # ─── Extended AI Response ─────────────────────────────────────────────────────

@@ -18,3 +18,12 @@ passlib[bcrypt]
 bcrypt==3.2.2
 # Async extras
 anyio
+
+# AI Explorer
+google-genai
+python-dotenv
+
+# Enterprise Analysis Depdendencies
+pytesseract
+Pillow
+yara-python

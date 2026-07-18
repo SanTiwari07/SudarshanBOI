@@ -65,9 +65,9 @@ function ExecutiveRiskPanel({ data, confidence }: { data: FraudCardData; confide
     { name: 'Static Code Analysis', done: true },
     { name: 'URL / String Extraction', done: true },
     { name: 'Explainability Engine', done: true },
-    { name: 'Dynamic Sandbox', done: false },
-    { name: 'Network Behaviour', done: false },
-    { name: 'Certificate Validation', done: false },
+    { name: 'Dynamic Sandbox', done: data.dynamic_available },
+    { name: 'Network Behaviour', done: data.dynamic_available },
+    { name: 'Certificate Validation', done: !!data.certificate && Object.keys(data.certificate).length > 0 },
   ];
 
   const scoreColor = (() => {

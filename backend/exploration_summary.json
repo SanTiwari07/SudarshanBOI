@@ -1,0 +1,13 @@
+{
+    "mode": "ai",
+    "duration_seconds": 30,
+    "screens_visited": 2,
+    "buttons_clicked": 1,
+    "forms_completed": 0,
+    "permissions_granted": 0,
+    "dialogs_dismissed": 0,
+    "loops_detected": 0,
+    "gemini_calls": 0,
+    "cache_hits": 1,
+    "coverage_percent": 25
+}
