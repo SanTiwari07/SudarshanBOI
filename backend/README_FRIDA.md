@@ -14,7 +14,7 @@ sandbox for the Sudarshan platform.
 
 ---
 
-## ⚡ Quick Start (Recommended)
+## Quick Start (Recommended)
 
 After the one-time emulator setup (Steps 1–2 below), use the startup script to
 launch the **entire platform with a single command**:

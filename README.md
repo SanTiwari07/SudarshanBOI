@@ -1,10 +1,10 @@
-# 🛡️ Sudarshan Enterprise — Android Malware Intelligence Platform
+# Sudarshan Enterprise — Android Malware Intelligence Platform
 
 **Sudarshan** is an enterprise-grade Android APK analysis platform designed for banking fraud detection. It combines static analysis (Androguard / MobSF), dynamic behavioral instrumentation (Frida), threat correlation, and AI-powered intelligence reporting into a single deployable Docker stack.
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 > Make sure your Android Emulator (AVD) is running before you start.
 
@@ -26,115 +26,116 @@ This single command handles everything:
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    SUDARSHAN ENTERPRISE                     │
-│                                                             │
-│  ┌──────────┐    ┌──────────────┐    ┌───────────────────┐  │
-│  │  React   │───▶│   FastAPI    │───▶│  MobSF (Docker)   │  │
-│  │ Frontend │    │   Backend    │    └───────────────────┘  │
-│  └──────────┘    │              │                           │
-│                  │  ┌────────┐  │    ┌───────────────────┐  │
-│                  │  │Andro-  │  │    │ Android Emulator  │  │
-│                  │  │guard   │  │    │  (host machine)   │  │
-│                  │  └────────┘  │    │                   │  │
-│                  │              │◀───│  frida-server     │  │
-│                  │  ┌────────┐  │    │  (ADB TCP 5555)   │  │
-│                  │  │Frida   │  │    └───────────────────┘  │
-│                  │  │Engine  │  │                           │
-│                  │  └────────┘  │    ┌───────────────────┐  │
-│                  │              │───▶│  SQLite (cases DB)│  │
-│                  │  ┌────────┐  │    └───────────────────┘  │
-│                  │  │AI/LLM  │  │                           │
-│                  │  │Report  │  │                           │
-│                  │  └────────┘  │                           │
-│                  └──────────────┘                           │
-└─────────────────────────────────────────────────────────────┘
++-------------------------------------------------------------+
+|                    SUDARSHAN ENTERPRISE                     |
+|                                                             |
+|  +----------+    +--------------+    +-------------------+  |
+|  |  React   |--->|   FastAPI    |--->|  MobSF (Docker)   |  |
+|  | Frontend |    |   Backend    |    +-------------------+  |
+|  +----------+    |              |                           |
+|                  |  +--------+  |    +-------------------+  |
+|                  |  | Andro- |  |    | Android Emulator  |  |
+|                  |  | guard  |  |    |  (host machine)   |  |
+|                  |  +--------+  |    |                   |  |
+|                  |              |<---|  frida-server     |  |
+|                  |  +--------+  |    |  (ADB TCP 5555)   |  |
+|                  |  | Frida  |  |    +-------------------+  |
+|                  |  | Engine |  |                           |
+|                  |  +--------+  |    +-------------------+  |
+|                  |              |--->|  SQLite (cases DB)|  |
+|                  |  +--------+  |    +-------------------+  |
+|                  |  | AI/LLM |  |                           |
+|                  |  | Report |  |                           |
+|                  |  +--------+  |                           |
+|                  +--------------+                           |
++-------------------------------------------------------------+
 ```
 
 ### Analysis Pipeline
 
 ```
-APK Upload → Static Analysis → MobSF → Frida Dynamic Sandbox
-    → Threat Correlation (VT / AbuseIPDB / OTX)
-    → FRS Score → AI Intelligence Report → Dashboard
+APK Upload -> Static Analysis -> MobSF -> Frida Dynamic Sandbox
+    -> Threat Correlation (VT / AbuseIPDB / OTX)
+    -> FRS Score -> AI Intelligence Report -> Dashboard
 ```
 
 ---
 
-## 📊 Risk Scoring
+## Risk Scoring
 
 ### Fraud Risk Score (FRS)
 
 ```
-FRS = 0.25×STEI + 0.35×BFCI + 0.20×Correlation + 0.20×BankingImpact
+FRS = 0.25*STEI + 0.35*BFCI + 0.20*Correlation + 0.20*BankingImpact
 ```
 
 ### Banking Fraud Confidence Index (BFCI)
 
 ```
-BFCI = (0.35×Accessibility) + (0.25×SMS) + (0.20×Overlay)
-     + (0.10×BankingTarget) + (0.05×Network) + (0.05×Persistence)
+BFCI = (0.35*Accessibility) + (0.25*SMS) + (0.20*Overlay)
+     + (0.10*BankingTarget) + (0.05*Network) + (0.05*Persistence)
 ```
 
 | Score Range | Risk Band     |
 |-------------|---------------|
-| 0 – 29      | Low Risk      |
-| 30 – 49     | Suspicious    |
-| 50 – 74     | High Risk     |
-| 75 – 100    | Critical      |
+| 0 - 29      | Low Risk      |
+| 30 - 49     | Suspicious    |
+| 50 - 74     | High Risk     |
+| 75 - 100    | Critical      |
 
 ---
 
-## 🗂️ Project Structure
+## Project Structure
 
 ```
 Sudarshan BOI/
-├── start.ps1                    # ⚡ One-command startup script
-├── docker-compose.yml           # Docker stack definition
-├── .env                         # Environment configuration
-├── backend/
-│   ├── Dockerfile
-│   ├── requirements.txt
-│   ├── README_FRIDA.md          # Frida setup guide
-│   └── app/
-│       ├── main.py              # FastAPI entrypoint
-│       ├── routes/
-│       │   ├── upload.py        # APK analysis pipeline
-│       │   ├── auth.py          # JWT authentication
-│       │   └── cases.py         # Case history
-│       ├── engines/
-│       │   ├── frida_sandbox.py   # Frida/ADB controller
-│       │   ├── multi_stage_engine.py # Multi-stage analysis
-│       │   ├── ui_explorer.py     # Automated UI interaction
-│       │   ├── risk_engine.py     # FRS/BFCI scoring
-│       │   ├── mobsf_client.py    # MobSF integration
-│       │   └── frida_hooks/
-│       │       └── banking_trojan.js  # Frida instrumentation script
-│       ├── models/
-│       │   └── schemas.py         # Pydantic API schemas
-│       └── db/
-│           └── database.py        # SQLite persistence
-└── frontend/
-    ├── src/
-    │   ├── App.tsx               # Main app + type definitions
-    │   ├── pages/
-    │   │   ├── Upload.tsx        # APK upload page
-    │   │   ├── FraudCard.tsx     # Executive risk card
-    │   │   ├── TechnicalView.tsx # SOC analyst view
-    │   │   ├── ThreatIntelView.tsx # Threat intelligence panel
-    │   │   ├── History.tsx       # Case history
-    │   │   └── Login.tsx         # Authentication
-    │   └── utils/
-    │       └── derive.ts         # UI data derivation helpers
-    └── vite.config.ts
++-- start.ps1                    # One-command startup script
++-- docker-compose.yml           # Docker stack definition
++-- .env                         # Environment configuration
++-- CHANGELOG.md                 # Change history
++-- backend/
+|   +-- Dockerfile
+|   +-- requirements.txt
+|   +-- README_FRIDA.md          # Frida setup guide
+|   +-- app/
+|       +-- main.py              # FastAPI entrypoint
+|       +-- routes/
+|       |   +-- upload.py        # APK analysis pipeline
+|       |   +-- auth.py          # JWT authentication
+|       |   +-- cases.py         # Case history
+|       +-- engines/
+|       |   +-- frida_sandbox.py       # Frida/ADB controller
+|       |   +-- multi_stage_engine.py  # Multi-stage analysis
+|       |   +-- ui_explorer.py         # Automated UI interaction
+|       |   +-- risk_engine.py         # FRS/BFCI scoring
+|       |   +-- mobsf_client.py        # MobSF integration
+|       |   +-- frida_hooks/
+|       |       +-- banking_trojan.js  # Frida instrumentation script
+|       +-- models/
+|       |   +-- schemas.py             # Pydantic API schemas
+|       +-- db/
+|           +-- database.py            # SQLite persistence
++-- frontend/
+    +-- src/
+    |   +-- App.tsx               # Main app + type definitions
+    |   +-- pages/
+    |   |   +-- Upload.tsx        # APK upload page
+    |   |   +-- FraudCard.tsx     # Executive risk card
+    |   |   +-- TechnicalView.tsx # SOC analyst view
+    |   |   +-- ThreatIntelView.tsx # Threat intelligence panel
+    |   |   +-- History.tsx       # Case history
+    |   |   +-- Login.tsx         # Authentication
+    |   +-- utils/
+    |       +-- derive.ts         # UI data derivation helpers
+    +-- vite.config.ts
 ```
 
 ---
 
-## 🔧 Configuration
+## Configuration
 
 Key environment variables (`.env` file):
 
@@ -150,7 +151,7 @@ Key environment variables (`.env` file):
 
 ---
 
-## 📡 API Endpoints
+## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -165,7 +166,7 @@ Key environment variables (`.env` file):
 
 ---
 
-## 🔐 Authentication
+## Authentication
 
 The API uses JWT Bearer tokens. Default credentials (development only):
 
@@ -183,13 +184,13 @@ curl -X POST http://localhost:8000/api/v1/auth/login \
 
 ---
 
-## 📋 CHANGELOG
+## Changelog
 
 See [CHANGELOG.md](./CHANGELOG.md) for a full list of changes by date.
 
 ---
 
-## ⚠️ Known Limitations
+## Known Limitations
 
 - `frida-server` must be re-started after each emulator reboot (handled automatically by `start.ps1`).
 - The `frida-server` binary (~106 MB) cannot be stored in Git — must be pushed to the emulator manually (one-time setup).
@@ -198,6 +199,6 @@ See [CHANGELOG.md](./CHANGELOG.md) for a full list of changes by date.
 
 ---
 
-## 📄 License
+## License
 
 Internal use — Sudarshan Enterprise Platform.
