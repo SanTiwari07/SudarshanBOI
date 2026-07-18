@@ -1,6 +1,6 @@
 <div align="center">
   <img src="frontend/public/vite.svg" alt="Sudarshan Logo" width="120" height="120" />
-  <h1>🛡️ SUDARSHAN</h1>
+  <h1>SUDARSHAN</h1>
   <p><b>Banking Threat Intelligence Platform for Mobile Fraud Operations</b></p>
   <p><i>Prepared and Submitted for Bank of India and IIT Hyderabad under the BOI Hackathon 2026</i></p>
   
@@ -13,14 +13,14 @@
 
 ---
 
-## 🚀 The Problem: Intelligence Translation
+## The Problem: Intelligence Translation
 A malicious APK can compromise a customer account in under 90 seconds. A fraud analyst typically begins an investigation 3–7 days later. **This is not a malware detection problem; this is an intelligence translation problem.**
 
 *Existing tools generate technical reports. **Sudarshan generates fraud operations decisions.***
 
 ---
 
-## 🎯 Design Principles
+## Design Principles
 
 Sudarshan is built on principles inspired by proven fraud-intelligence systems and adapted for the unique realities of India's digital banking ecosystem.
 
@@ -33,7 +33,7 @@ Sudarshan is built on principles inspired by proven fraud-intelligence systems a
 
 ---
 
-## 🧠 The Sudarshan Intelligence Funnel
+## The Sudarshan Intelligence Funnel
 
 Sudarshan processes thousands of raw signals into a single, analyst-ready intelligence package in under 5 minutes.
 
@@ -45,7 +45,7 @@ Sudarshan processes thousands of raw signals into a single, analyst-ready intell
 
 ---
 
-## 📊 Deterministic Risk Scoring
+## Deterministic Risk Scoring
 
 Sudarshan eliminates black-box AI by using transparent, weighted mathematical formulas based on observable threat behaviors.
 
@@ -65,7 +65,7 @@ BFCI = (0.35 × Accessibility Abuse) + (0.25 × SMS Interception) +
 
 ---
 
-## ⚡ Quick Start
+## Quick Start
 
 > **Prerequisite**: Ensure your Android Emulator (AVD) is running.
 
@@ -83,7 +83,7 @@ Launch the entire platform (Backend, Frontend, Sandbox, and MobSF) with a single
 
 ---
 
-## 🏗️ Enterprise Architecture & Feasibility
+## Enterprise Architecture & Feasibility
 
 Designed for immediate banking deployment with **Banking-Grade Governance**:
 - **Data Sovereignty:** Fully on-premises deployment, air-gapped support.
@@ -99,7 +99,7 @@ Designed for immediate banking deployment with **Banking-Grade Governance**:
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 - `start.ps1` — One-click bootstrapper
 - `backend/` — FastAPI backend, Frida hooks, risk engines, and AI generation
